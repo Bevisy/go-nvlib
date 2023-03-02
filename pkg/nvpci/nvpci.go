@@ -31,6 +31,8 @@ const (
 	PCIDevicesRoot = "/sys/bus/pci/devices"
 	// PCINvidiaVendorID represents PCI vendor id for NVIDIA
 	PCINvidiaVendorID uint16 = 0x10de
+	// PCIKunlunxinVendorID represents PCI vendor id for KUNLUNXIN
+	PCIKunlunxinVendorID uint16 = 0x1d22
 	// PCIVgaControllerClass represents the PCI class for VGA Controllers
 	PCIVgaControllerClass uint32 = 0x030000
 	// PCI3dControllerClass represents the PCI class for 3D Graphics accellerators
@@ -75,6 +77,11 @@ type NvidiaPCIDevice struct {
 	Resources MemoryResources
 }
 
+// IsXPUController if vendor id == 0x1d22
+func (d *NvidiaPCIDevice) IsXPUController() bool {
+	return d.Vendor == PCIKunlunxinVendorID
+}
+
 // IsVGAController if class == 0x300
 func (d *NvidiaPCIDevice) IsVGAController() bool {
 	return d.Class == PCIVgaControllerClass
@@ -92,7 +99,7 @@ func (d *NvidiaPCIDevice) IsNVSwitch() bool {
 
 // IsGPU either VGA for older cards or 3D for newer
 func (d *NvidiaPCIDevice) IsGPU() bool {
-	return d.IsVGAController() || d.Is3DController()
+	return d.IsVGAController() || d.Is3DController() || d.IsXPUController()
 }
 
 // IsResetAvailable some devices can be reset without rebooting,
